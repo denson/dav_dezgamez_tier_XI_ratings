@@ -39,7 +39,7 @@ main{padding:24px 0 48px}
 h2{border-left:5px solid var(--red);padding-left:10px;margin:32px 0 12px}
 .note{color:var(--muted);font-size:.9rem}
 .tablewrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:8px}
-table{border-collapse:collapse;width:100%;min-width:480px}
+table{border-collapse:collapse;width:100%;min-width:640px}
 th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line)}
 th{background:var(--navy);color:#fff;cursor:pointer;user-select:none;white-space:nowrap}
 tr:last-child td{border-bottom:0}
@@ -50,6 +50,8 @@ tr:last-child td{border-bottom:0}
 .card header{background:none;border:0;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
 .card h3{margin:0}
 .card .meta{font-size:.9rem}
+.card .from{color:var(--muted);font-size:.9rem;margin:.1rem 0 .4rem}
+.nation{font-weight:600}
 .card h4{margin:12px 0 2px;color:var(--navy)}
 @media (prefers-color-scheme: dark){.card h4{color:var(--gold)}}
 .card p{margin:.3rem 0}
@@ -90,9 +92,9 @@ footer{border-top:1px solid var(--line);padding:20px 0;color:var(--muted);font-s
   </section>
 
   <h2>Ratings at a glance</h2>
-  <p class="note">Click a column heading to sort. Each tank links to that point in the video. Scores are Dezgamez's personal opinion, out of 10.</p>
+  <p class="note">Click a column heading to sort. Each tank links to that point in the video. Scores are Dezgamez's personal opinion, out of 10. "Researched from" is the tier X tank that leads to it in the tech tree.</p>
   <div class="tablewrap"><table id="tbl"><thead><tr>
-    <th data-k="i">#</th><th data-k="name">Tank</th><th data-k="score">Rating</th><th>Video</th>
+    <th data-k="i">#</th><th data-k="name">Tank</th><th data-k="nation">Nation</th><th data-k="from">Researched from (tier X)</th><th data-k="score">Rating</th><th>Video</th>
   </tr></thead><tbody></tbody></table></div>
 
   <h2>Tank by tank</h2>
@@ -193,20 +195,32 @@ const T=[
  ["A versatile scout. It can do damage on bad maps, both damage and spotting on average maps, and spotting on scout maps. The ability extends spotting, lets you shoot tanks outside their view range, and keeps them spotted longer.","He prefers it to the WZ-219 because he is useful in more situations."],
  ["The blind shot marker feature is 100% useless in his experience. No one outside his platoon has ever fired at the markers.","The WZ-219 has advantages on some maps, but he rates the Borkenkäfer higher overall."]]
 ];
+const N={
+"Shugo":["Japan","Ho-Ri 3"],"STK-2":["Japan","Type 71"],"Vz. 63P":["Czechoslovakia","Vz. 55"],
+"Szakal":["Czechoslovakia","CS-63"],"BV-11":["Sweden","UDES 15/16"],"STRV 107-12":["Sweden","Strv 103B"],
+"CAV 71":["Italy","Progetto M40 mod. 65"],"PTZ-78":["China","WZ-113G FT"],"BZ-79":["China","BZ-75"],
+"WZ-219":["China","WZ-132-1"],"Breaker":["Great Britain","FV217 Badger"],"Contriver":["Great Britain","FV230 Canopener"],
+"Executor":["Great Britain","Concept No.5"],"Imbattable":["France","AMX 50 B"],"Fauteur":["France","AMX M4 mle. 54"],
+"AS-XX":["France","Bat.-Châtillon 25 t"],"Gorilla":["USA","T110E4"],"Black Rock":["USA","Personal Mission reward (not researched)"],
+"T803":["USA","T110E5"],"Hacker":["USA","M48A5 Patton"],"Ares 90 C":["USA","Ares 90"],
+"KR-1":["USSR","IS-7"],"Object 432U":["USSR","Object 430U"],"Hirschkäfer":["Germany","Grille 15"],
+"Taschenratte":["Germany","Maus"],"Pz. Neu":["Germany","Kampfpanzer 67"],"Leopard 120":["Germany","Leopard 1"],
+"Borkenkäfer":["Germany","Rheinmetall Panzerwagen"]};
 const cls=s=>s>=8.5?"s-hi":s>=7?"s-mid":"s-lo";
-const rows=T.map((t,i)=>({i:i+1,name:t[0],score:t[1],disp:t[2],sec:t[3],ts:t[4]}));
+const rows=T.map((t,i)=>({i:i+1,name:t[0],nation:N[t[0]][0],from:N[t[0]][1],score:t[1],disp:t[2],sec:t[3],ts:t[4]}));
 const tb=document.querySelector("#tbl tbody");
 let sortK="i",asc=true;
 function draw(){
   const r=[...rows].sort((a,b)=>{const x=a[sortK],y=b[sortK];const c=typeof x==="string"?x.localeCompare(y):x-y;return asc?c:-c});
-  tb.innerHTML=r.map(t=>`<tr><td>${t.i}</td><td><a href="#t${t.i}">${t.name}</a></td><td class="score ${cls(t.score)}">${t.disp}</td><td><a href="${VID}${t.sec}">${t.ts}</a></td></tr>`).join("");
+  tb.innerHTML=r.map(t=>`<tr><td>${t.i}</td><td><a href="#t${t.i}">${t.name}</a></td><td>${t.nation}</td><td>${t.from}</td><td class="score ${cls(t.score)}">${t.disp}</td><td><a href="${VID}${t.sec}">${t.ts}</a></td></tr>`).join("");
 }
 document.querySelectorAll("th[data-k]").forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortK===k)asc=!asc;else{sortK=k;asc=k!=="score"?true:false}draw()});
 draw();
 const li=a=>a.map(p=>`<p>${p}</p>`).join("");
 document.getElementById("cards").innerHTML=T.map((t,i)=>`
 <article class="card" id="t${i+1}">
-  <header><h3>${t[0]}</h3><div class="meta"><span class="score ${cls(t[1])}">${t[2]} / 10</span> &middot; <a href="${VID}${t[3]}">Watch at ${t[4]}</a></div></header>
+  <header><h3>${t[0]}</h3><div class="meta"><span class="nation">${N[t[0]][0]}</span> &middot; <span class="score ${cls(t[1])}">${t[2]} / 10</span> &middot; <a href="${VID}${t[3]}">Watch at ${t[4]}</a></div></header>
+  <p class="from"><strong>Researched from:</strong> ${N[t[0]][1]}</p>
   <div class="like"><h4>What he likes</h4>${li(t[5])}</div>
   <div class="dislike"><h4>What he doesn't like</h4>${li(t[6])}</div>
 </article>`).join("");
